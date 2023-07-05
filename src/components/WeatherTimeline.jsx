@@ -247,7 +247,7 @@ const WeatherTimeline = ( { submittedLocation } ) => {
             )}
           <Infos>
             <Info>
-              <h6>Sunset</h6>
+              <h6>Sunrise</h6>
               <p>{selectedDay.astro.sunrise}</p>
             </Info>
             <Info>
