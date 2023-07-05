@@ -1,11 +1,13 @@
 import WeatherBox  from './WeatherBox';
 import WeatherTimeline from './WeatherTimeline';
+import { useState } from 'react';
 
-const Body = () => {
+const Body = ({ submittedLocation }) => {
+
     return (
         <>
-            <WeatherBox />
-            <WeatherTimeline />
+            <WeatherBox submittedLocation={submittedLocation} />
+            <WeatherTimeline submittedLocation={submittedLocation} />
         </>
     )
 }

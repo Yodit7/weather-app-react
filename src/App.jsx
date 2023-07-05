@@ -1,7 +1,7 @@
 import './App.css'
 import Body from './components/Body';
 import Header from './components/Header'
-
+import { useState } from 'react';
 import styled from 'styled-components';
 
 
@@ -24,11 +24,18 @@ const Main = styled.div`
 `;
 
 const App = () => {
+  const [submittedLocation, setSubmittedLocation] = useState('');
+
+  const handleLocationSubmit = (location) => {
+    setSubmittedLocation(location);
+  };
+
+
   return (
     <AppContainer>
-      <Header />
+      <Header onLocationSubmit={handleLocationSubmit}/>
       <Main>
-        <Body />
+        <Body submittedLocation={submittedLocation}/>
       </Main>
     </AppContainer>
   )

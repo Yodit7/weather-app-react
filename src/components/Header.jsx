@@ -27,29 +27,102 @@ const Title = styled.h6`
     font-weight: 400;
 `;
 
-const SearchLocation = styled.div`
-    
+
+const SearchIcon = styled(MdEditLocationAlt)`
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: rgb(247, 196, 18);
+
+  .search-icon:hover {
+    color: white;
+  }
 `;
 
-const Header = () => {
-    const [clicked, setClicked] = useState(false)
+const DropdownContainer = styled.div`
+  position: relative;
+`;
+
+const DropdownContent = styled.div`
+  position: absolute;
+  top: 150%;
+  right: 0;
+  margin-right: 5px;
+  width: 318px;
+  padding: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+`;
+
+const DropdownForm = styled.form`
+  display: flex;
+  align-items: center;
+`;
+
+const DropdownInput = styled.input`
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+`;
+
+const DropdownButton = styled.button`
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgb(247, 196, 18);
+  color: rgb(27,28,72);
+  border: none;
+  cursor: pointer;
+  border-radius: 15px;
+
+  :hover {
+    font-weight: 400;
+  }
+`;
 
 
-    const editLocation = () => {
-        console.log("edit location")
-        setClicked(true);
-    }
+const Header = ( {onLocationSubmit }) => {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [locationInput, setLocationInput] = useState("");
+ 
+    const toggleDropdown = () => {
+        setIsDropdownOpen((prevState) => !prevState);
+    };
 
-    console.log(clicked)
+    const handleLocationChange = (event) => {
+        setLocationInput(event.target.value);
+    };
+    
+    const handleLocationSubmit = (event) => {
+        event.preventDefault();
+        
+        onLocationSubmit(locationInput)
+        
+        setLocationInput("");
+        setIsDropdownOpen(false);
+    };
+
 
     return (
         <Container>
             <Title>Weather Forecast</Title>
-            <MdEditLocationAlt className="search-icon" onClick={editLocation}/>
-            {clicked ? 
-            <SearchLocation>
-            
-            </SearchLocation> : <div></div> }
+            <DropdownContainer>
+                <SearchIcon className="search-icon" onClick={toggleDropdown} />
+                {isDropdownOpen && (
+                <DropdownContent>
+                    <DropdownForm onSubmit={handleLocationSubmit}>
+                    <DropdownInput
+                        type="text"
+                        value={locationInput}
+                        onChange={handleLocationChange}
+                        placeholder="Enter a new location"
+                    />
+                    <DropdownButton type="submit">Submit</DropdownButton>
+                    </DropdownForm>
+                </DropdownContent>
+            )}
+        </DropdownContainer>
         </Container>
     )
 }

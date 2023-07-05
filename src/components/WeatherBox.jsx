@@ -66,7 +66,7 @@ const Location = styled.p`
     }
 `;
 
-const WeatherBox = () => {
+const WeatherBox = ({ submittedLocation }) => {
 
     const [todayTemp, setTodayTemp] = useState("");
     const [location, setLocation] = useState("");
@@ -74,21 +74,28 @@ const WeatherBox = () => {
     const [todayDate, setTodayDate] = useState("");
 
 
+   
     useEffect(() => {
         getWeather()
         setTodayDate(getFormattedDate())
-    }, [])
+    }, [submittedLocation])
+
 
     const getFormattedDate = () => {
         const date = new Date();
         const options = { weekday: "long", day: "numeric", month: "long" };
         return date.toLocaleDateString("en-US", options);
       };
+ 
+    // default location
+    if(submittedLocation === "") {
+        submittedLocation = 'Berlin';
+    }
 
     /**
      * get todays temperature
      */
-    const url = 'https://weatherapi-com.p.rapidapi.com/current.json?q=53.1%2C-0.13';
+    const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${submittedLocation}`;
     const options = {
         method: 'GET',
         headers: {
@@ -96,6 +103,7 @@ const WeatherBox = () => {
             'X-RapidAPI-Host': 'weatherapi-com.p.rapidapi.com'
         }
     };
+
 
     const getWeather = async () =>  {
         try {

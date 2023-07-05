@@ -78,6 +78,7 @@ const BoxTop = styled.div`
 
 const Infos = styled.div`
     display: flex;
+    justify-content: center;
     gap: 20px;
     margin-top: 10px;
 `;
@@ -106,18 +107,38 @@ const Info = styled.div`
 
 `;
 
-const WeatherTimeline = () => {
+const Sub = styled.div`
+    height: 120px;
+    width: auto;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    background-color: rgb(40, 39, 81);
+    border-radius: 15px;
+    margin: 25px auto;
+`;
 
-    const [data, setData] = useState("")
+const WeatherTimeline = ( { submittedLocation } ) => {
     const [today, setToday] = useState("")
     const [tomorrow, setTomorrow] = useState("")
     const [nextDays, setNextDays] = useState("")
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [location, setLocation] = useState("")
+    const [subscription, setSubscription] = useState(true)
+
+    // default location
+   if(submittedLocation === "") {
+    submittedLocation = 'Berlin';
+   }
+
 
     useEffect(() => {
-        getData()
-    }, [])
+        getData();
+    }, [submittedLocation])
 
-    const url = 'https://weatherapi-com.p.rapidapi.com/forecast.json?q=London&days=3';
+    const url = `https://weatherapi-com.p.rapidapi.com/forecast.json?q=${submittedLocation}&days=3`;
     const options = {
         method: 'GET',
         headers: {
@@ -132,60 +153,113 @@ const WeatherTimeline = () => {
             const result = await response.json();
             setToday(result.forecast.forecastday[0]);
             setTomorrow(result.forecast.forecastday[1]);
+            setSelectedDay(result.forecast.forecastday[0]);
         } catch (error) {
             console.error(error);
         }
     }
 
+    const handlePrevClick = () => {
+        if (currentIndex > 0) {
+          setCurrentIndex((prevIndex) => prevIndex - 1);
+        } else {
+            setCurrentIndex((prevIndex) => prevIndex -1);
+        }
+
+        if(currentIndex === -10 ) {
+            setCurrentIndex(-10)
+        }
+      };
+    
+      const handleNextClick = () => {
+        if (currentIndex < tomorrow.hour.length - 3) {
+          setCurrentIndex((prevIndex) => prevIndex + 1);
+        }
+
+        if(currentIndex === 12){
+            setCurrentIndex(12)
+        }
+
+      };
+
+      const getTimeLabel = (index) => {
+        const hour = index + 10;
+        const timeLabel = hour >= 12 ? " pm" : " am";
+        const formattedHour = hour > 12 ? hour - 12 : hour;
+        return `${formattedHour}${timeLabel}`;
+      };
+
+      const handleToday = () => {
+        setSubscription(true)
+        setSelectedDay(today)
+      }
+
+      const handleTomorrow = () => {
+        setSubscription(true)
+        setSelectedDay(tomorrow)
+      }
+
+      const handleNextDays = () => {
+        setSubscription(false);
+      }
+
 
   return (
-<>
+    <>
       <Weekday>
-        <li className="active">Today</li>
-        <li>Tomorrow</li>
-        <li>Next 7 Days</li>
+      <li className={selectedDay === today && (subscription) ? "active" : ""} onClick={handleToday}>Today</li>
+      <li className={selectedDay === tomorrow && (subscription) ? "active" : ""} onClick={handleTomorrow}>Tomorrow</li>
+      <li className={!subscription ? "active" : ""} onClick={handleNextDays}>Next 7 Days</li>
       </Weekday>
-      {!today && !tomorrow ? (
+      {!today && !tomorrow && !nextDays ? (
         <div>Loading...</div>
       ) : (
         <div>
+        {subscription ? (
           <Boxes>
-            <BsChevronCompactLeft className="box-icons" />
+            <BsChevronCompactLeft className="box-icons" onClick={handlePrevClick}/>
             <Box>
               <BoxTop>
-                {tomorrow.hour && <img src={tomorrow.hour[10].condition.icon} />}
-                <p className="time">10 am</p>
+                {selectedDay.hour && <img src={selectedDay.hour[currentIndex + 10].condition.icon} />}
+                <p className="time">
+                    {getTimeLabel(currentIndex)}
+                </p>
               </BoxTop>
               <p>
-                {tomorrow.hour && tomorrow.hour[10].temp_c} <span>° C</span>
+                {selectedDay.hour && selectedDay.hour[currentIndex + 10].temp_c} <span>° C</span>
               </p>
             </Box>
             <Box>
               <BoxTop>
-                {tomorrow.hour && <img src={tomorrow.hour[11].condition.icon} />}
-                <p className="time">11 am</p>
+                {selectedDay.hour && <img src={selectedDay.hour[currentIndex + 11].condition.icon} />}
+                <p className="time">
+                    {getTimeLabel(currentIndex + 1)}
+                </p>
               </BoxTop>
               <p>
-                {tomorrow.hour && tomorrow.hour[11].temp_c} <span>° C</span>
+                {selectedDay.hour && selectedDay.hour[currentIndex + 11].temp_c} <span>° C</span>
               </p>
             </Box>
-            <BsChevronCompactRight className="box-icons" />
+            <BsChevronCompactRight className="box-icons" onClick={handleNextClick} />
           </Boxes>
+            ) : (
+                <Sub>Need subscription</Sub>
+            )}
           <Infos>
             <Info>
               <h6>Sunset</h6>
-              <p>{today.astro.sunrise}</p>
+              <p>{selectedDay.astro.sunrise}</p>
             </Info>
             <Info>
               <h6>Humidity</h6>
-              <p>{today.day.avghumidity} %</p>
+              <p>{selectedDay.day.avghumidity} %</p>
             </Info>
             <Info>
               <h6>Rain</h6>
-              <p>{today.day.daily_chance_of_rain} %</p>
+              <p>{selectedDay.day.daily_chance_of_rain} %</p>
             </Info>
           </Infos>
-        </div>
+        </div> 
       )}
     </>
   );
